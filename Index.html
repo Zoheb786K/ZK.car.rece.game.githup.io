@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Racing Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Car Racing Game</h1>
+  <div id="game">
+    <img id="car" src="car.png" alt="Your Car" />
+    <img id="obstacle" src="obstacle.png" alt="Obstacle" />
+  </div>
+  <div id="score">Score: <span id="currentScore">0</span></div>
+  <div id="highScore">High Score: <span id="highScoreValue">0</span></div>
+  <audio id="bgMusic" src="background.mp3" autoplay loop></audio>
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  text-align: center;
+  font-family: sans-serif;
+  background: #444;
+  color: white;
+}
+
+#game {
+  position: relative;
+  width: 300px;
+  height: 500px;
+  margin: auto;
+  border: 2px solid #fff;
+  overflow: hidden;
+  background: #111;
+}
+
+#car, #obstacle {
+  position: absolute;
+  width: 50px;
+  height: 100px;
+}
+
+#car {
+  bottom: 10px;
+  left: 125px;
+}
+
+#score, #highScore {
+  margin-top: 10px;
+  font-size: 20px;
+}
+const car = document.getElementById("car");
+const obstacle = document.getElementById("obstacle");
+const scoreEl = document.getElementById("currentScore");
+const highScoreEl = document.getElementById("highScoreValue");
+
+let carLeft = 125;
+let score = 0;
+let highScore = localStorage.getItem("highScore") || 0;
+highScoreEl.innerText = highScore;
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft" && carLeft > 0) carLeft -= 25;
+  if (e.key === "ArrowRight" && carLeft < 250) carLeft += 25;
+  car.style.left = carLeft + "px";
+});
+
+function moveObstacle() {
+  let obstacleTop = -100;
+  let obstacleLeft = Math.floor(Math.random() * 6) * 50;
+  obstacle.style.left = obstacleLeft + "px";
+
+  const fall = setInterval(() => {
+    if (obstacleTop > 500) {
+      score++;
+      scoreEl.innerText = score;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        highScoreEl.innerText = highScore;
+      }
+      clearInterval(fall);
+      moveObstacle();
+    } else {
+      obstacleTop += 5;
+      obstacle.style.top = obstacleTop + "px";
+
+      if (
+        obstacleTop > 380 &&
+        obstacleLeft < carLeft + 50 &&
+        obstacleLeft + 50 > carLeft
+      ) {
+        alert("Game Over! Score: " + score);
+        score = 0;
+        scoreEl.innerText = score;
+        obstacle.style.top = "-100px";
+        clearInterval(fall);
+        moveObstacle();
+      }
+    }
+  }, 20);
+}
+
+moveObstacle();
